@@ -1,0 +1,859 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Monitoring Petugas GB SET 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style id="gb-style">
+/* Layout: lembar kerja lapangan — kepala surat ringkas, papan rekap, lalu dua kolom tim (UMB / UMK) berisi kartu petugas bernomor */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#15202b; --muted:#5b6876; --line:#d9dee4;
+  --accent:#1f4e79; --accent-ink:#ffffff;
+  --umb:#0f766e; --umb-soft:#e3f3f1; --umk:#b45309; --umk-soft:#fbefe1;
+  --ok:#15803d; --ok-soft:#e4f4e8; --warn:#9a6700; --warn-soft:#fbf2d9;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f151b; --surface:#17202a; --ink:#e6ebf0; --muted:#9aa6b2; --line:#2a3642;
+  --accent:#7fb2e5; --accent-ink:#0f151b;
+  --umb:#5eead4; --umb-soft:#12302d; --umk:#fbbf6a; --umk-soft:#33260f;
+  --ok:#6ee7a0; --ok-soft:#123222; --warn:#f2c94c; --warn-soft:#332a10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151b; --surface:#17202a; --ink:#e6ebf0; --muted:#9aa6b2; --line:#2a3642;
+  --accent:#7fb2e5; --accent-ink:#0f151b;
+  --umb:#5eead4; --umb-soft:#12302d; --umk:#fbbf6a; --umk-soft:#33260f;
+  --ok:#6ee7a0; --ok-soft:#123222; --warn:#f2c94c; --warn-soft:#332a10; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px}
+.head-text{min-width:0;display:flex;flex-direction:column;gap:4px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-stretch:85%;font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1.02;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:60ch}
+.head-actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:600 14px var(--f-body);display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:#b42318;border-color:transparent;background:transparent;padding:6px 8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tally div{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.tally b{font-family:var(--f-display);font-stretch:90%;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.tally span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.note{background:var(--warn-soft);color:var(--ink);border-left:4px solid var(--warn);padding:10px 14px;border-radius:6px;white-space:pre-wrap}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:600 13px var(--f-body);padding:8px 14px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.search{flex:1 1 220px;max-width:320px;font:15px var(--f-body);padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start}
+.team{display:flex;flex-direction:column;gap:10px;min-width:0}
+.team-h{display:flex;align-items:baseline;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.team-h .code{font-family:var(--f-mono);font-size:13px;padding:2px 8px;border-radius:4px}
+.team-h h2{font-family:var(--f-display);font-stretch:90%;font-size:20px;margin:0;font-weight:700}
+.team-h small{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.k-UMB{--k:var(--umb);--k-soft:var(--umb-soft)} .k-UMK{--k:var(--umk);--k-soft:var(--umk-soft)}
+.team-h .code{background:var(--k-soft);color:var(--k)}
+.list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;color:inherit;text-decoration:none;min-width:0}
+a.card:hover{border-color:var(--k);box-shadow:0 0 0 1px var(--k)}
+.num{font-family:var(--f-mono);font-size:13px;width:34px;height:34px;display:grid;place-items:center;border-radius:6px;background:var(--k-soft);color:var(--k)}
+.who{min-width:0;display:flex;flex-direction:column}
+.who strong{font-weight:600;font-size:16px;overflow-wrap:anywhere}
+.who span{font-size:12px;color:var(--muted)}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.no{background:var(--warn-soft);color:var(--warn)}
+.empty{color:var(--muted);padding:12px 0}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp-h{display:flex;align-items:center;gap:10px;margin-top:6px}
+.grp-h .role{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--k);border:1px solid var(--k);border-radius:4px;padding:1px 6px}
+.grp-h strong{font-weight:600;font-size:15px}
+.grp-h small{margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.grp .list{padding-left:14px;border-left:2px solid var(--k-soft)}
+.sub-h{font-family:var(--f-display);font-stretch:90%;font-size:17px;margin:4px 0 0;font-weight:700}
+td.pml{width:190px}
+table.pml-t{min-width:480px}
+/* panel kelola */
+.manage{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.manage h2{font-family:var(--f-display);font-stretch:90%;margin:0;font-size:22px}
+.manage p{margin:0;color:var(--muted);font-size:14px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);min-width:0}
+input,select,textarea{font:15px var(--f-body);text-transform:none;letter-spacing:0;font-weight:400;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;min-width:0}
+textarea{min-height:70px;resize:vertical}
+.rows{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:6px}
+td{padding:4px 6px;vertical-align:middle}
+td.n{font-family:var(--f-mono);color:var(--muted);width:40px}
+td.kat{width:110px} td.act{width:60px}
+input.bad{border-color:#b42318}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msg{font-size:14px;color:var(--muted)}
+details summary{cursor:pointer;font-weight:600}
+.foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:flex;flex-wrap:wrap;gap:6px 16px}
+@media (max-width:560px){.tally{grid-template-columns:repeat(2,minmax(0,1fr))}.search{max-width:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* tab navigasi + rekap */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-top:-6px}
+.tabs button{font:600 14px var(--f-body);padding:10px 14px;color:var(--muted);background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}
+.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button:hover{color:var(--ink)}
+.rk-sec{display:flex;flex-direction:column;gap:10px}
+.rk-sec h2{font-family:var(--f-display);font-stretch:90%;font-size:20px;margin:0;font-weight:700}
+.rk-sec .hint{color:var(--muted);font-size:13px;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.c1{background:var(--ok)} .c2{background:var(--umb)} .c3{background:var(--accent)} .cx{background:#c2410c} .cb{background:var(--line)}
+table.rk{min-width:760px;background:var(--surface);border:1px solid var(--line);border-radius:10px;border-collapse:separate;border-spacing:0;overflow:hidden}
+table.rk th{background:var(--bg);border-bottom:1px solid var(--line);padding:8px 10px;white-space:nowrap}
+table.rk td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.rk tr:last-child td{border-bottom:0}
+table.rk td.r,table.rk th.r{text-align:right}
+table.rk tr.tot td{font-weight:700;background:var(--bg)}
+table.rk td.dim{color:var(--muted)}
+.bar2{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);min-width:90px;flex:1}
+.bar2 i{display:block;height:100%}
+.progc{display:flex;align-items:center;gap:8px;min-width:150px}
+.progc b{font-weight:600;min-width:42px;text-align:right}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:1px 7px;border-radius:4px;background:var(--k-soft);color:var(--k)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.filters select{width:auto;min-width:200px;background:var(--surface)}
+.need{display:inline-block;min-width:24px;padding:1px 7px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:700}
+a.plink{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:1px solid var(--line)}
+a.plink:hover{color:var(--k);border-bottom-color:var(--k)}
+table.tg-t{min-width:300px;max-width:420px}
+table.tg-t input{text-align:right}
+table.rk.rs{min-width:560px}
+.up{background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.up h3{margin:0;font-family:var(--f-display);font-stretch:90%;font-size:19px}
+.up ol{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:8px;align-items:center}
+.drop.over{border-color:var(--accent);background:var(--bg)}
+.drop input{width:auto;background:transparent;border:0}
+.up table{min-width:620px}
+.st-ok{color:var(--ok);font-weight:600} .st-no{color:#b42318;font-weight:600}
+</style>
+<div id="gb-root"></div>
+<script type="application/json" id="gb-state">{"kegiatan":"Gladi Bersih Survei Ekonomi Terintegrasi (GB SET) 2027","satker":"BPS Kota Makassar","folderUrl":"","catatan":"","diperbarui":"2026-11-06","kategori":[{"kode":"UMB","nama":"Usaha Menengah & Besar"},{"kode":"UMK","nama":"Usaha Mikro & Kecil"}],"pml":[{"id":"m01","nama":"Asri Yuliani","kat":"UMB"},{"id":"m02","nama":"Nasruddin","kat":"UMB"},{"id":"m03","nama":"Andi Arman Astha","kat":"UMK"}],"petugas":[{"id":"p03","nama":"Herniawati S.","kat":"UMB","pml":"m01","url":"https://docs.google.com/spreadsheets/d/1idOalK6vGbs1SmjW-Wyhwep6qc5RcK6CiFyvNvgoUQk/edit?usp=drive_link","target":10},{"id":"p04","nama":"Rosmianti","kat":"UMB","pml":"m01","url":"https://docs.google.com/spreadsheets/d/1OLH_YJstAf07iaRjIWGksn9t5n_PIf9yhjnqKiRaz0s/edit?usp=drive_link","target":10},{"id":"p02","nama":"Rahmat Hidayat","kat":"UMB","pml":"m01","url":"https://docs.google.com/spreadsheets/d/1gCS9VNPLMVjehq_Bfe3izUZFvhCbmx7EB2kNRZUlOMY/edit?usp=drive_link","target":10},{"id":"p01","nama":"Akbar Ati","kat":"UMB","pml":"m02","url":"https://docs.google.com/spreadsheets/d/1W27QMq3UgPOD1PgTpG1VrXSYLhsDvLY6EHD5iuaR0tA/edit?usp=sharing","target":10},{"id":"p05","nama":"Windayani","kat":"UMB","pml":"m02","url":"https://docs.google.com/spreadsheets/d/1EpolFN2UxGAGCcdDD86vIymihuIspHStdSW9v3Bznuo/edit?usp=drive_link","target":10},{"id":"p06","nama":"Rafli Armansyah","kat":"UMB","pml":"m02","url":"https://docs.google.com/spreadsheets/d/1izZ8r6Hxzb2ZZhDeTHIWKcHVO7N1A9Ygn0PSSqM8iFg/edit?usp=drive_link","target":10},{"id":"p07","nama":"Andi Anhar","kat":"UMK","pml":"m03","url":"https://docs.google.com/spreadsheets/d/1OCqdYrtaH1XW9e4CTYyLSqZ2VwUuHT3_LsJONOXlz0M/edit?usp=drive_link","target":30},{"id":"p08","nama":"M. Yauri Trisandy","kat":"UMK","pml":"m03","url":"https://docs.google.com/spreadsheets/d/1YUSnEFMAr7EdthME3G8nDgf24eci4h0l2IP-AphQG6g/edit?usp=drive_link","target":30},{"id":"p09","nama":"Hajrah Amrullah","kat":"UMK","pml":"m03","url":"https://docs.google.com/spreadsheets/d/13fw_gls9WAUoHudCkhRwlbYYE42uyTyqjax8mnSi7So/edit?usp=drive_link","target":30}],"target":{"UMB":{"C":10,"D":2,"E":2,"F":2,"G":15,"H":2,"I":2,"J":2,"K":2,"L":7,"M":2,"N":2,"O":2,"Q":2,"R":2,"S":2,"T":2},"UMK":{"C":6,"D":3,"E":3,"F":3,"G":30,"H":3,"I":12,"J":3,"K":3,"L":3,"M":3,"N":3,"O":3,"Q":3,"R":3,"S":3,"T":3}},"rekap":{"p03":{"tgl":"2026-11-06","src":"Google Drive","rows":[["545061","J","",""],["2774140","G","",""],["2884518","G","",""],["3355627","R","",""],["97445852","O","",""],["97476625","Q","",""],["97750524","G","",""],["METRO SPA","T","",""],["IBK NITRO MAKASSAR","Q","",""],["FANTASI ERATAMA PT","S","",""],["ZONE 2000","S","",""],["REDAKSI MENARA INDONESIA","J","",""],["JUAL NASI UDUK (YUNAWATI)","C","",""],["ILLUMINATI METARPHOSIS PT","N","",""]]},"p04":{"tgl":"2026-11-06","src":"Google Drive","rows":[["170426","G","",""],["3234882","G","",""],["4257348","G","",""],["42924607","L","",""],["97465119","L","",""],["97479123","G","",""],["ANUGRAH MEDIA BUANA PT","N","",""],["MULTI PRESTASI","O","",""],["LIFE HOSPITALITY GROUP, PT","I","",""],["TOKO PUTRA GOWA","G","",""],["TOKO MALINO (HANFREY GORITMAN)","G","",""],["FAJAR TECHNO SYSTEM PT","K","",""],["FAJAR GRAHA PENA PT","M","",""]]},"p02":{"tgl":"2026-11-06","src":"Google Drive","rows":[["223076","","",""],["223157","L","",""],["223660","L","",""],["3319407","G","",""],["3620398","H","",""],["73410023","","",""],["97446655","E","",""],["97451961","C","",""],["KOPERASI PEGAWAI NEGERI BINA KARYA SMP 2","L","",""],["HAJI LA TUNRUNG A.M.C","L","",""],["HARSINTA ISTANA ELECTRONIC (POLYTRON), P","T","",""],["TOKO ARDI JAYA","G","",""],["MAHARANI TOURS DAN TRAVEL","O","",""],["JAMKRIDA SULSEL, PT","L","",""]]},"p01":{"tgl":"2026-11-06","src":"Google Drive","rows":[["3122002","D","",""],["3253579","S","",""],["61061751","E","",""],["61062061","M","",""],["94421156","C","",""],["94457162","D","",""],["97459585","L","",""],["97470043","C","",""],["97500078","C","",""],["97500475","C","",""],["98061855","C","",""],["SERVIS ELEKTRONIK \u003cYULIANTO IDRIS>","","",""],["MEGA CITRA KARYA, PT","C","",""],["KRISTAL ES PERKASA","D","",""]]},"p05":{"tgl":"2026-11-06","src":"Google Drive","rows":[["2623612","G","",""],["2809225","G","",""],["6632297","F","",""],["97443449","G","",""],["97449751","G","",""],["97462803","G","",""],["PEDAGANG IKAN TIMBANGAN SUDARMAN","G","",""],["SAHRUL LOGOSTIK NUSANTARA PT","H","",""],["KHARISMA SAMUDERA LINTASINDO PT","H","",""],["BOSOWA SPORT CENTER","S","",""],["SINAR GRAHA, PT (SINAR GRAHA, PT)","C","",""],["SIAGANT BERSAMA MACHINERY, PT (SIAGANG B","C","",""],["SIAGANT BOATS, PT (SIAGANT BOATS, PT)","C","",""]]},"p06":{"tgl":"2026-11-06","src":"Google Drive","rows":[["3145726","O","",""],["97450179","R","",""],["97466174","F","",""],["97494394","K","",""],["97749964","G","",""],["97749969","I","",""],["97750138","G","",""],["97750618","G","",""],["97750804","G","",""],["97751080","G","",""],["YAYASAN PENDIDIKAN GUNUNG SARI","Q","",""],["MPC VETINDO PRATAMA","N","",""],["KBIHU AL IKHLAS MESRA","O","",""],["LOTTE MART INDONESIA, PT","G","",""]]},"p07":{"tgl":"2026-11-06","src":"Google Drive","rows":[["TOKO INTAN SAMSUDDIN / INTAN SAMSUDIN","G","",""],["TOKO HAS JAYA / HASAN SIKKI","G","",""],["TOKO WARDHANA / ST. WARDHANA","G","",""],["PULSA CELL ERIKA / NASRULLAH","K","",""],["PENGELOLA RENTAL MOBIL AKRAM / KASSE","O","",""],["TOKO BAJU (RABIAH) / BASRI","G","",""],["OJEK MAXIM(RUSLI NURDIN) / RUSLI NURDIN","H","",""],["KAMAR KOST KOSAN(HAMSUSAFAR) / HAMSUSAFA","I","",""],["SPPG SUDIANG RAYA 2","I","",""],["57572837","R","",""],["TOKO NAJWA COOKIES / HARTUTI. S.S","C","",""],["TOKO BAJU HERIANI / HERIANI","G","",""],["RUMAH KONTRAKAN(YUSRIL) / YUSRIL","M","",""],["TK AR RAHMAN","Q","",""],["JEFRI STUDIO / SIMON SANDI","N","",""],["USAHA TEMPE (KHOLIK) / ABDUL KHOLIQ","C","",""],["TOKO REZKY BANGUNAN(A.RAMADAN) / A . RAM","G","",""],["Toko baju camelia / AHMAD","G","",""],["PONDOK BIRU / MUH TAHIR","I","",""],["Usaha loket pembayaran (Dewi Fatimah) / ","L","",""],["TOKO BONE SEMBAKO / ANDI KUSNAWATI","G","",""],["TOKO TIGA PUTRI / MUH.NATSIR T.","G","",""],["MARIO PHONE / IRWAN","K","",""],["TOKO BERKAH","G","",""],["RAIHAN COMP / EFENDY HASBULLAH","T","",""],["AGO CELL","K","",""],["Sanggar seni tradisional sepak raga / H.","S","",""],["TOKO HAJRAH PCV","G","",""],["COTO KONRO ASSALAM","I","",""],["USAHA IRNA SINOLINDA / SULAIMAN","J","",""],["BANK SAMPAH PEDULI PASARA / ANIS AMRAH","E","",""],["KIOS INDRIYANI / DARWIS","G","",""],["PEMBORONG PROYEK BANGUNAN (SAHARUDDIN) /","F","",""],["4553380","R","",""],["KIOAS ARIF NASI GORENG","I","",""]]},"p08":{"tgl":"2026-11-06","src":"Google Drive","rows":[["WARUNG KELONTONG / ROHANI","G","",""],["TOKO KELONTONG / ZAINUDDIN","G","",""],["55495020","G","",""],["27370022","G","",""],["57572828","G","",""],["WARUNG MARIO PUNGGAWA / TIMANG","I","",""],["JUAL PENTOL / RUBAEDI","I","",""],["WARUNG BAKSO MAS TOYO / SUMARDI","I","",""],["33519867","O","",""],["TOKO AINUN / ZULFIKAR, SP","G","",""],["97503018","H","",""],["USAHA JUAL VOUCHER KUOTA DAN PULSA / KAM","K","",""],["6593222","C","",""],["WARUNG CAMPURAN / NURUL MUSLIMAH S","G","",""],["WARUNG CAMPURAN / AHMAD SUARDI","G","",""],["TK ISLAM TERPADU AL GHAZALI","Q","",""],["KLINIK BAKTI BARU / SYAHRIR T","R","",""],["TOKO SYAMSUDDIN / SYAMSUDDIN DG.RALA","G","",""],["17083257","G","",""],["BAKSO MAS BOLLA","I","",""],["USAHA KONTRAKAN FATMA MURNI / FATMA MURN","M","",""],["OLEH-OLEH MAKASSAR BABY CRABS ZASHA [MUH","C","",""],["SINERGI KARYA BMT / HASNIAH","G","",""],["OJEK ONLINE (MUH ANDIKA PUTRA) / AMIR","H","",""],["BENGKEL BERKAH (ILHAM SANJAYA) / SALAHUD","T","",""],["BANK SAMPAH RT 1","E","",""],["EDITOR VIDEO, AUDIA DAN DESAIN GRAFIS / ","N","",""],["SANGGAR SENAM AMMA / ST. RAHMAWATI","S","",""],["KONTEN KREATOR / NURWANA SULTAN","J","",""],["BRI Link / SALMIATY KADIR","L","",""],["BANGUNAN / RUSLI","F","",""]]},"p09":{"tgl":"2026-11-06","src":"Google Drive","rows":[["17338638","I","",""],["55580405","G","",""],["55554625","I","",""],["55443805","G","",""],["55606329","I","",""],["ISRA KONTRAKTOR / ISRA MULYANA MURSALIM","F","",""],["55491047","G","",""],["97489298","G","",""],["55492230","I","",""],["14878843","G","",""],["CAYU CELIA CELL (NUR AKIB PUTERA KAHIR) ","K","",""],["RUMAH KONTRAKAN MANUNGGAL (HJ LA BUHARI)","M","",""],["IJK BAJU BODO COLLECTION (ANI RAHAYU) / ","O","",""],["AGEN BRILINK ILYAS / ILYAS","L","",""],["ARSYILA LAUNDRY (ANGRAENI T) / HARDIANTO","T","",""],["33468307","G","",""],["OJEK ONLINE (MUH YUSRI RUKMAN) / MUH YUS","H","",""],["OJEK ONLINE (ABIDIN FARID) / ABIDIN FARI","H","",""],["55645991","G","",""],["55600064","G","",""],["KLINIK ALIFIA 1 / SYARIFUDDIN","R","",""],["PEMULUNG (CACANG DG. TULO) / CACANG DG.T","E","",""],["17090371","G","",""],["Jual token listrik / RUSLI","D","",""],["LIVE STREAMER FREELANCE (ADRIANI) / ADRI","J","",""],["55367532","G","",""],["NRL GYM","S","",""],["18260419","N","",""],["6622283","Q","",""],["KONTEN KREATOR (ST NURHAYATI SE) / ST NU","J","",""],["JALANGKOTE \u003cNASRIANI> / BUDIMAN","C","",""],["ALKALIN WATER","C","",""]]}}}</script>
+<script id="gb-app">
+(function(){
+  var STATE = JSON.parse(document.getElementById('gb-state').textContent);
+  var STYLE = document.getElementById('gb-style').textContent;
+  var APP = document.getElementById('gb-app').textContent;
+  var root = document.getElementById('gb-root');
+  STATE.rekap = STATE.rekap || {};
+  function tabFromHash(){ return location.hash==='#simpel' ? 'simpel' : 'daftar'; }
+  var ui = {tab:tabFromHash(), filter:'ALL', q:'', editing:false, draft:null, canEdit:false, artifact:null, msg:'',
+            rf:'ALL', rp:'', sp:'', sf:'ALL', mcp:null, sync:{busy:false,done:0,total:0,msg:''}, rb:'frame', upOpen:false, up:{items:[], busy:false, msg:'', paste:'', pastePid:''}};
+
+  var XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  var JSZIP_URL='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function okUrl(u){return /^https:\/\/\S+$/i.test(String(u||'').trim());}
+  function pad(i){return (i<10?'0':'')+i;}
+  function PML(){return STATE.pml||[];}
+  function pmlNama(id){var m=PML().filter(function(x){return x.id===id;})[0];return m?m.nama:'';}
+  function tgl(s){try{var d=new Date(s+'T00:00:00');if(isNaN(d))return s;return d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});}catch(e){return s;}}
+  function today(){var n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate());}
+  function fmtPct(a,b){return b? (Math.round(a/b*1000)/10).toLocaleString('id-ID')+'%' : '–';}
+
+  /* ---------- agregasi rekap ---------- */
+  function A(){return {n:0,'1':0,'2':0,'3':0,x:0,b:0};}
+  function addTo(a,v){a.n++; if(!v) a.b++; else if(v==='1'||v==='2'||v==='3') a[v]++; else a.x++;}
+  var SRC = null;
+  function dataOf(p){return (SRC||STATE.rekap)[p.id]||null;}
+  var DUMMY = null;
+  function dummyData(){
+    if(DUMMY) return DUMMY;
+    var seed=20271106; function rnd(){seed=(seed*1103515245+12345)%2147483648; return seed/2147483648;}
+    function pick(arr){return arr[Math.floor(rnd()*arr.length)];}
+    var KAT={UMB:['C','C','C','D','E','F','G','G','H','I','J','K','L','M','N','P','Q','S'], UMK:['C','C','G','G','G','G','I','I','I','S','S','H','N']};
+    var LAIN=['4','5','6','7','8'];
+    var out={};
+    STATE.petugas.forEach(function(p,ix){
+      var n=p.kat==='UMB'?10+Math.floor(rnd()*9):18+Math.floor(rnd()*15);
+      var prog=0.35+rnd()*0.6, rows=[];
+      for(var i=0;i<n;i++){
+        var k=pick(KAT[p.kat]||KAT.UMB), v='', w='';
+        if(rnd()<prog){ var r=rnd();
+          if(r<0.64){v='1';w=k;} else if(r<0.75){v='2';do{w=pick(KAT[p.kat]||KAT.UMB);}while(w===k);} else if(r<0.84){v='3';w=k;} else {v=pick(LAIN);}
+        }
+        rows.push(['D'+pad(ix+1)+pad(i+1),k,v,w]);
+      }
+      out[p.id]={tgl:today(), src:'dummy', rows:rows};
+    });
+    return (DUMMY=out);
+  }
+  var DUMMY2 = null;
+  function dummyData2(){
+    if(DUMMY2) return DUMMY2;
+    var seed=4242; function rnd(){seed=(seed*1103515245+12345)%2147483648; return seed/2147483648;}
+    var out={}, LAIN=['4','5','6','7','8'];
+    STATE.kategori.forEach(function(k){
+      var ps=STATE.petugas.filter(function(p){return p.kat===k.kode;}); if(!ps.length) return;
+      var prog={}; ps.forEach(function(p){ prog[p.id]=0.35+rnd()*0.6; out[p.id]={tgl:today(), src:'dummy', rows:[]}; });
+      var tg=(STATE.target||{})[k.kode]||{}, ix=0, keys=Object.keys(tg).sort();
+      keys.forEach(function(L){ var t=tg[L]; if(!t) return; var n=t+Math.max(1,Math.ceil(t*0.3));
+        for(var i=0;i<n;i++){ var p=ps[ix++%ps.length], v='', w='';
+          if(rnd()<prog[p.id]){ var r=rnd(); if(r<0.66){v='1';w=L;} else if(r<0.74){v='2';w=pick(keys,L);} else if(r<0.84){v='3';w=L;} else v=LAIN[Math.floor(rnd()*LAIN.length)]; }
+          out[p.id].rows.push(['D'+L+pad(i+1),L,v,w]); } });
+      function pick(arr,not){var c=arr.filter(function(x){return x!==not && tg[x];}); return c.length?c[Math.floor(rnd()*c.length)]:not;}
+    });
+    return (DUMMY2=out);
+  }
+  var LETTERS='ABCDEFGHIJKLMNOPQRSTU'.split('');
+  function aggPetugas(p){var a=A(), d=dataOf(p); if(d) d.rows.forEach(function(r){addTo(a,r[2]);}); return a;}
+  function bar(a){
+    if(!a.n) return '<div class="bar2"></div>';
+    function seg(k,c){var w=a[k]/a.n*100; return w?'<i class="'+c+'" style="width:'+w+'%"></i>':'';}
+    return '<div class="bar2" aria-hidden="true">'+seg('1','c1')+seg('2','c2')+seg('3','c3')+seg('x','cx')+'</div>';
+  }
+  function progCell(a){return '<td><div class="progc">'+bar(a)+'<b>'+fmtPct(a.n-a.b,a.n)+'</b></div></td>';}
+  function numCells(a){
+    return '<td class="r">'+a.n+'</td><td class="r">'+a['1']+'</td><td class="r">'+a['2']+'</td><td class="r">'+a['3']+'</td>'+
+           '<td class="r"><b>'+(a['1']+a['2']+a['3'])+'</b></td><td class="r">'+a.x+'</td><td class="r">'+a.b+'</td>';
+  }
+  var NUMH = '<th class="r">Sampel</th><th class="r">Kode 1</th><th class="r">Kode 2</th><th class="r">Kode 3</th><th class="r">Eligible</th><th class="r">Tidak eligible</th><th class="r">Belum didata</th>';
+
+  /* ---------- tampilan utama ---------- */
+  function headHTML(){
+    return '<header class="head"><div class="head-text"><span class="eyebrow">'+esc(STATE.satker)+' · Dashboard Petugas</span>'+
+         '<h1>Monitoring Petugas GB SET 2027</h1><p class="sub">'+esc(STATE.kegiatan)+'.'+(ui.tab==='daftar'?' Klik nama petugas untuk membuka spreadsheet masing-masing.':'')+'</p></div>'+
+         '<div class="head-actions">'+
+         (okUrl(STATE.folderUrl)?'<a class="btn" href="'+esc(STATE.folderUrl)+'" target="_blank" rel="noopener">Buka folder Drive ↗</a>':'')+
+         (ui.canEdit?'<button class="btn primary" id="b-edit" type="button">'+(ui.editing?'Tutup kelola':'Kelola dashboard')+'</button>':'')+
+         '</div></header>'+
+         '<nav class="tabs" aria-label="Menu">'+[['daftar','Daftar petugas'],['simpel','Rekap Progres']].map(function(t){
+           return '<button type="button" data-tab="'+t[0]+'"'+(ui.tab===t[0]?' aria-current="page"':'')+'>'+t[1]+'</button>'; }).join('')+'</nav>';
+  }
+
+  function viewHTML(){
+    var h = '<div class="wrap">'+headHTML();
+    if(ui.editing) h += manageHTML();
+    if(ui.tab==='simpel'){
+      var hasReal = STATE.petugas.some(function(p){return STATE.rekap[p.id];});
+      if(!hasReal) SRC=dummyData2();
+      try{
+        h += syncBar();
+        if(ui.canEdit){ h += '<div class="bar"><button type="button" class="btn" id="b-up">'+(ui.upOpen?'Tutup unggah manual':'Perbarui data (unggah file)')+'</button></div>'; if(ui.upOpen) h += uploadHTML(); }
+        h += (hasReal?'':'<div class="note"><b>DATA DUMMY.</b> Data hasil lapangan asli belum diunggah, jadi tab ini sementara menampilkan angka acak.</div>')+simpleHTML();
+      } finally { SRC=null; }
+    }
+    else h += listHTML();
+    var P=STATE.petugas, linked=P.filter(function(p){return okUrl(p.url);}).length;
+    h += '<footer class="foot"><span>Diperbarui '+esc(tgl(STATE.diperbarui))+'</span><span>'+linked+' dari '+P.length+' petugas sudah punya tautan spreadsheet</span></footer></div>';
+    return h;
+  }
+
+  function listHTML(){
+    var P = STATE.petugas, linked = P.filter(function(p){return okUrl(p.url);}).length, h='';
+    var counts = STATE.kategori.map(function(k){return {k:k, n:P.filter(function(p){return p.kat===k.kode;}).length};});
+    h += '<section class="tally" aria-label="Rekap petugas"><div><b>'+P.length+'</b><span>Total petugas</span></div><div><b>'+PML().length+'</b><span>PML</span></div>';
+    counts.forEach(function(c){h+='<div><b>'+c.n+'</b><span>Petugas '+esc(c.k.kode)+'</span></div>';});
+    h += '<div><b>'+linked+'/'+P.length+'</b><span>Spreadsheet tertaut</span></div></section>';
+    if(STATE.catatan) h += '<div class="note">'+esc(STATE.catatan)+'</div>';
+    h += '<div class="tools"><div class="seg" role="group" aria-label="Filter kategori">';
+    [{v:'ALL',t:'Semua'}].concat(STATE.kategori.map(function(k){return {v:k.kode,t:k.kode};})).forEach(function(o){
+      h+='<button type="button" data-f="'+esc(o.v)+'" aria-pressed="'+(ui.filter===o.v)+'">'+esc(o.t)+'</button>';});
+    h += '</div><input class="search" id="q" type="search" placeholder="Cari nama petugas atau PML" value="'+esc(ui.q)+'" aria-label="Cari nama petugas atau PML"></div>';
+    h += '<div class="teams">';
+    var q = ui.q.trim().toLowerCase();
+    function card(x){
+      var p=x.p, ok=okUrl(p.url), a=aggPetugas(p), d=dataOf(p);
+      var prog = d ? ' · '+(a.n-a.b)+'/'+a.n+' didata' : '';
+      var inner = '<span class="num">'+(x.i+1)+'</span><span class="who"><strong>'+esc(p.nama)+'</strong><span>'+(ok?'Buka spreadsheet ↗':'Spreadsheet belum ditautkan')+prog+'</span></span>'+
+                  '<span class="pill '+(ok?'ok':'no')+'">'+(ok?'Tertaut':'Belum')+'</span>';
+      return '<li>'+(ok?'<a class="card k-'+esc(p.kat)+'" href="'+esc(p.url.trim())+'" target="_blank" rel="noopener">'+inner+'</a>':'<div class="card k-'+esc(p.kat)+'">'+inner+'</div>')+'</li>';
+    }
+    STATE.kategori.forEach(function(k){
+      if(ui.filter!=='ALL' && ui.filter!==k.kode) return;
+      var inKat = P.map(function(p,i){return {p:p,i:i};}).filter(function(x){return x.p.kat===k.kode;});
+      var pmls = PML().filter(function(m){return m.kat===k.kode;});
+      h += '<section class="team k-'+esc(k.kode)+'"><div class="team-h"><span class="code">'+esc(k.kode)+'</span><h2>'+esc(k.nama)+'</h2><small>'+pmls.length+' PML · '+inKat.length+' petugas</small></div>';
+      var shown = 0;
+      var groups = pmls.map(function(m){return {m:m, xs:inKat.filter(function(x){return x.p.pml===m.id;})};});
+      var loose = inKat.filter(function(x){return !pmls.some(function(m){return m.id===x.p.pml;});});
+      if(loose.length) groups.push({m:null, xs:loose});
+      groups.forEach(function(g){
+        var pmlHit = g.m && q && g.m.nama.toLowerCase().indexOf(q)>-1;
+        var xs = g.xs.filter(function(x){return !q || pmlHit || x.p.nama.toLowerCase().indexOf(q)>-1;});
+        if(q && !xs.length && !pmlHit) return;
+        shown++;
+        h += '<div class="grp"><div class="grp-h">'+(g.m?'<span class="role">PML</span><strong>'+esc(g.m.nama)+'</strong>':'<strong>Belum ada PML</strong>')+'<small>'+g.xs.length+' petugas</small></div><ul class="list">';
+        if(!xs.length) h += '<li class="empty">Belum ada petugas di bawah PML ini.</li>';
+        xs.forEach(function(x){h+=card(x);});
+        h += '</ul></div>';
+      });
+      if(!shown) h += '<p class="empty">Tidak ada petugas yang cocok.</p>';
+      h += '</section>';
+    });
+    h += '</div>';
+    return h;
+  }
+
+  /* ---------- tab simpel: target per tim × kategori usaha, prelist berisi cadangan ---------- */
+  function elig(a){return a['1']+a['2']+a['3'];}
+  function C(){return {t:0,e:0,ec:0,x:0,b:0,n:0};}
+  function addC(o,s){o.t+=s.t;o.e+=s.e;o.ec+=s.ec;o.x+=s.x;o.b+=s.b;o.n+=s.n;}
+  function sisaT(o){return Math.max(o.t-o.ec,0);}
+  function isE(v){return v==='1'||v==='2'||v==='3';}
+  // sel[tim][kategori] untuk sekumpulan petugas; eligible dihitung menurut kolom W (bila kosong: kategori frame)
+  function cells(ps){
+    var m={};
+    ps.forEach(function(p){ var d=dataOf(p); if(!d) return; var tm=(m[p.kat]=m[p.kat]||{});
+      d.rows.forEach(function(r){ var v=r[2], kf=r[1]||'(kosong)', ke=r[3]||r[1]||'(kosong)';
+        var cf=(tm[kf]=tm[kf]||C()); cf.n++; if(!v) cf.b++; else if(!isE(v)) cf.x++;
+        if(isE(v)){ (tm[ke]=tm[ke]||C()).e++; } }); });
+    return m;
+  }
+  function withTarget(m, useT){
+    STATE.kategori.forEach(function(k){ var tg=(STATE.target||{})[k.kode]||{}, tm=(m[k.kode]=m[k.kode]||{});
+      if(useT) Object.keys(tg).forEach(function(L){ (tm[L]=tm[L]||C()).t=tg[L]; });
+      Object.keys(tm).forEach(function(L){ var c=tm[L]; c.ec=useT?Math.min(c.e,c.t):c.e; }); });
+    return m;
+  }
+  function sumTim(m,kode){var o=C(); Object.keys(m[kode]||{}).forEach(function(L){addC(o,m[kode][L]);}); return o;}
+  function kurang(c){return c.t>0 && c.b<sisaT(c);}
+  function progT(o){
+    if(!o.t) return '<td class="dim">–</td>';
+    var e=Math.min(o.ec/o.t,1)*100, done=o.ec>=o.t;
+    return '<td><div class="progc"><div class="bar2" aria-hidden="true">'+(e?'<i class="c1" style="width:'+e+'%"></i>':'')+'</div><b>'+(done?'✓ 100%':fmtPct(o.ec,o.t))+'</b></div></td>';
+  }
+  function numT(o,warn){
+    var sp = warn ? '<span class="need" title="Sisa prelist lebih sedikit dari sisa target">'+o.b+'</span>' : o.b;
+    return '<td class="r">'+(o.t||'–')+'</td><td class="r"><b>'+(o.t?o.ec:o.e)+'</b>'+(o.t&&o.e>o.ec?' <span class="dim" title="Eligible melebihi target">(+'+(o.e-o.ec)+')</span>':'')+'</td><td class="r">'+(o.t?sisaT(o):'–')+'</td><td class="r">'+o.x+'</td><td class="r">'+sp+'</td>';
+  }
+  var NUMT='<th class="r">Target</th><th class="r">Eligible</th><th class="r">Sisa target</th><th class="r">Tidak eligible</th><th class="r">Sisa prelist</th>';
+  function didata(a){ var e=elig(a)/(a.n||1)*100, x=a.x/(a.n||1)*100;
+    return '<td><div class="progc"><div class="bar2" aria-hidden="true">'+(e?'<i class="c1" style="width:'+e+'%"></i>':'')+(x?'<i class="cx" style="width:'+x+'%"></i>':'')+'</div><b>'+fmtPct(a.n-a.b,a.n)+'</b></div></td>'; }
+  function sortK(a,b){var pa=a.charAt(0)==='(',pb=b.charAt(0)==='('; return pa!==pb?(pa?1:-1):a<b?-1:a>b?1:0;}
+
+  function simpleHTML(){
+    var P=STATE.petugas, h='';
+    var withData=P.filter(function(p){return dataOf(p);});
+    var hasT=STATE.kategori.some(function(k){return Object.keys((STATE.target||{})[k.kode]||{}).length;});
+    var all=withTarget(cells(P), true), tot=C(), byTim={}, short=[];
+    STATE.kategori.forEach(function(k){ byTim[k.kode]=sumTim(all,k.kode); addC(tot,byTim[k.kode]);
+      Object.keys(all[k.kode]).sort(sortK).forEach(function(L){ if(kurang(all[k.kode][L])) short.push(k.kode+' '+L); }); });
+    h += '<section class="tally" aria-label="Ringkasan progres se-Makassar">'+
+      '<div><b>'+tot.t+'</b><span>Target sampel eligible</span></div>'+
+      '<div><b>'+tot.ec+'</b><span>Eligible tercapai · '+(tot.t?fmtPct(tot.ec,tot.t):'–')+'</span></div>'+
+      '<div><b>'+sisaT(tot)+'</b><span>Sisa target</span></div>'+
+      STATE.kategori.map(function(k){ var o=byTim[k.kode]||C(); return '<div><b>'+(o.t?o.ec+'/'+o.t:o.e)+'</b><span>Eligible '+esc(k.kode)+(o.t?' · '+fmtPct(o.ec,o.t):'')+'</span></div>'; }).join('')+'</section>';
+    if(!hasT) h += '<div class="note">Target sampel per kategori belum diisi. Isi di Kelola dashboard.</div>';
+    if(!withData.length) return h;
+
+    // per kategori: filter tim (Semua/UMB/UMK) + petugas
+    var sf=ui.sf||'ALL', sel=ui.sp||'';
+    var pOpts=P.filter(function(p){return sf==='ALL'||p.kat===sf;});
+    if(sel && !pOpts.some(function(p){return p.id===sel;})) sel=ui.sp='';
+    var selP=P.filter(function(p){return p.id===sel;})[0];
+    h += '<section class="rk-sec"><h2>Rekap per kategori usaha</h2><p class="hint">'+(selP?'Target ditetapkan per tim, jadi untuk satu petugas ditampilkan jumlah eligible dan progres pendataan prelist-nya.':'Progres = eligible ÷ target, dihitung per kategori usaha dan dibatasi sampai target masing-masing kategori per tim.')+'</p>'+
+      '<div class="filters"><div class="seg" role="group" aria-label="Filter tim">'+
+        [{v:'ALL',t:'Semua'}].concat(STATE.kategori.map(function(k){return {v:k.kode,t:k.kode};})).map(function(o){
+          return '<button type="button" data-sf="'+esc(o.v)+'" aria-pressed="'+(sf===o.v)+'">'+esc(o.t)+'</button>';}).join('')+'</div>'+
+      '<select id="sp" aria-label="Pilih petugas"><option value="">Semua petugas</option>'+
+        pOpts.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===sel?' selected':'')+'>'+esc(p.nama)+'</option>';}).join('')+'</select></div>'+
+      '<div class="rows"><table class="rk rs">';
+    if(selP){
+      var g={}; var d=dataOf(selP);
+      if(d) d.rows.forEach(function(r){ var v=r[2], kf=r[1]||'(kosong)', ke=r[3]||r[1]||'(kosong)', gf=(g[kf]=g[kf]||A()); gf.n++; if(!v) gf.b++; else if(isE(v)) (g[ke]=g[ke]||A())[v]++; else gf.x++; });
+      var ks=Object.keys(g).sort(sortK), sub=A();
+      h += '<thead><tr><th>Kategori</th><th class="r">Prelist</th><th class="r">Eligible</th><th>Progres</th></tr></thead><tbody>';
+      if(!ks.length) h += '<tr><td colspan="4" class="dim">Belum ada data untuk petugas ini.</td></tr>';
+      ks.forEach(function(k){ var a=g[k]; ['n','1','2','3','x','b'].forEach(function(f){sub[f]+=a[f];});
+        h += '<tr><td><b>'+esc(k)+'</b></td><td class="r">'+a.n+'</td><td class="r"><b>'+elig(a)+'</b></td>'+didata(a)+'</tr>'; });
+      if(ks.length) h += '<tr class="tot"><td>Jumlah</td><td class="r">'+sub.n+'</td><td class="r">'+elig(sub)+'</td>'+didata(sub)+'</tr>';
+    } else {
+      var rowsK={};
+      STATE.kategori.forEach(function(k){ if(sf!=='ALL' && k.kode!==sf) return;
+        Object.keys(all[k.kode]).forEach(function(L){ addC((rowsK[L]=rowsK[L]||C()), all[k.kode][L]); }); });
+      var ks2=Object.keys(rowsK).filter(function(L){var c=rowsK[L]; return c.t||c.n||c.e;}).sort(sortK), sub2=C();
+      function numK(o){ return '<td class="r">'+(o.t||'–')+'</td><td class="r"><b>'+(o.t?o.ec:o.e)+'</b></td><td class="r">'+(o.t?sisaT(o):'–')+'</td>'; }
+      h += '<thead><tr><th>Kategori</th><th class="r">Target</th><th class="r">Eligible</th><th class="r">Sisa target</th><th>Progres</th></tr></thead><tbody>';
+      ks2.forEach(function(L){ var o=rowsK[L]; addC(sub2,o);
+        h += '<tr><td>'+(L.charAt(0)==='('?'<span class="dim">'+esc(L)+'</span>':'<b>'+esc(L)+'</b>')+'</td>'+numK(o)+progT(o)+'</tr>'; });
+      h += '<tr class="tot"><td>Jumlah</td>'+numK(sub2)+progT(sub2)+'</tr>';
+    }
+    h += '</tbody></table></div></section>';
+
+    // per petugas
+    h += '<section class="rk-sec"><h2>Rekap per petugas</h2><p class="hint">Klik nama petugas untuk membuka spreadsheet-nya. Progres = eligible ÷ target petugas.</p><div class="rows"><table class="rk rs"><thead><tr><th>No</th><th>Petugas</th><th>PML</th><th class="r">Target</th><th class="r">Prelist</th><th class="r">Eligible</th><th>Progres</th></tr></thead><tbody>';
+    STATE.kategori.forEach(function(k){
+      var sub=C();
+      P.forEach(function(p,i){
+        if(p.kat!==k.kode) return;
+        var d=dataOf(p), a=aggPetugas(p), t=parseInt(p.target,10)||0, e=elig(a);
+        var o={t:t, e:e, ec:t?Math.min(e,t):0, x:a.x, b:a.b, n:a.n}; addC(sub,o);
+        var nm = okUrl(p.url) ? '<a class="plink" href="'+esc(p.url.trim())+'" target="_blank" rel="noopener">'+esc(p.nama)+' ↗</a>' : esc(p.nama);
+        h += '<tr class="k-'+esc(p.kat)+'"><td class="dim">'+(i+1)+'</td><td><span class="chip">'+esc(p.kat)+'</span> '+nm+'</td><td class="dim">'+esc(pmlNama(p.pml)||'–')+'</td>'+
+             '<td class="r">'+(t||'–')+'</td>'+
+             (d ? '<td class="r">'+a.n+'</td><td class="r"><b>'+e+'</b></td>'+progT(o) : '<td colspan="3" class="dim">Belum masuk rekap</td>')+'</tr>';
+      });
+      h += '<tr class="tot"><td></td><td colspan="2">Subtotal '+esc(k.kode)+'</td><td class="r">'+(sub.t||'–')+'</td><td class="r">'+sub.n+'</td><td class="r">'+sub.e+'</td>'+progT(sub)+'</tr>';
+    });
+    h += '</tbody></table></div></section>';
+    return h;
+  }
+
+  /* ---------- tab rekap ---------- */
+  function rekapHTML(isDummy){
+    var P = STATE.petugas, h='';
+    var withData = P.filter(function(p){return dataOf(p);});
+    var tot=A(); withData.forEach(function(p){dataOf(p).rows.forEach(function(r){addTo(tot,r[2]);});});
+    var lastT = withData.map(function(p){return dataOf(p).tgl;}).sort().pop();
+
+    if(!isDummy) h += syncBar();
+    if(ui.canEdit && !isDummy){
+      h += '<div class="bar"><button type="button" class="btn" id="b-up">'+(ui.upOpen?'Tutup unggah manual':'Unggah file manual')+'</button>'+
+           (lastT?'<span class="msg">Data terakhir dimasukkan '+esc(tgl(lastT))+'</span>':'')+'</div>';
+      if(ui.upOpen) h += uploadHTML();
+    }
+
+    h += '<section class="tally" aria-label="Ringkasan progres se-Makassar">'+
+      '<div><b>'+tot.n+'</b><span>Target sampel</span></div>'+
+      '<div><b>'+(tot.n-tot.b)+'</b><span>Sudah didata · '+fmtPct(tot.n-tot.b,tot.n)+'</span></div>'+
+      '<div><b>'+(tot['1']+tot['2']+tot['3'])+'</b><span>Eligible (kode 1–3)</span></div>'+
+      '<div><b>'+tot.x+'</b><span>Tidak eligible</span></div>'+
+      '<div><b>'+tot.b+'</b><span>Belum didata</span></div>'+
+      '<div><b>'+withData.length+'/'+P.length+'</b><span>Spreadsheet masuk rekap</span></div></section>';
+
+    if(!withData.length){
+      h += '<div class="note">Belum ada data hasil lapangan di rekap. '+(ui.canEdit?'Tekan "Perbarui data dari spreadsheet" di atas untuk memasukkan data dari spreadsheet petugas.':'Rekap akan tampil setelah admin memperbarui data.')+'</div>';
+      return h;
+    }
+    if(withData.length<P.length){
+      var miss = P.filter(function(p){return !dataOf(p);}).map(function(p){return p.nama;});
+      h += '<div class="note">Target sampel baru menghitung '+withData.length+' dari '+P.length+' spreadsheet. Belum masuk: '+esc(miss.join(', '))+'.</div>';
+    }
+
+    h += '<div class="legend"><span><i class="c1"></i>Kode 1: ditemukan, aktif sesuai kategori frame</span><span><i class="c2"></i>Kode 2: ditemukan, berubah kategori tapi masih cakupan survei</span><span><i class="c3"></i>Kode 3: pindah, masih di wilayah kerja petugas</span><span><i class="cx"></i>Tidak eligible: kode selain 1–3 (STOP)</span><span><i class="cb"></i>Belum didata: kolom V kosong</span></div>';
+
+    /* 1. per tim */
+    h += '<section class="rk-sec"><h2>Rekap se-Makassar per tim</h2><div class="rows"><table class="rk"><thead><tr><th>Tim</th>'+NUMH+'<th>Progres</th></tr></thead><tbody>';
+    STATE.kategori.forEach(function(k){
+      var a=A(); P.forEach(function(p){ if(p.kat===k.kode && dataOf(p)) dataOf(p).rows.forEach(function(r){addTo(a,r[2]);}); });
+      h += '<tr class="k-'+esc(k.kode)+'"><td><span class="chip">'+esc(k.kode)+'</span> '+esc(k.nama)+'</td>'+numCells(a)+progCell(a)+'</tr>';
+    });
+    h += '<tr class="tot"><td>Total Kota Makassar</td>'+numCells(tot)+progCell(tot)+'</tr></tbody></table></div></section>';
+
+    /* 2. per kategori usaha */
+    var pOpts = P.filter(function(p){return ui.rf==='ALL'||p.kat===ui.rf;});
+    if(ui.rp && !pOpts.some(function(p){return p.id===ui.rp;})) ui.rp='';
+    h += '<section class="rk-sec"><h2>Rekap per kategori usaha</h2>'+
+      '<p class="hint">'+(ui.rb==='frame'?'Dikelompokkan menurut kategori usaha di frame (target). Cocok untuk melihat progres tiap kategori.':'Dikelompokkan menurut kolom W, kategori usaha hasil lapangan. Usaha yang belum didata atau tidak eligible dipisah di baris sendiri.')+'</p>'+
+      '<div class="filters"><div class="seg" role="group" aria-label="Dasar kategori">'+
+        '<button type="button" data-rb="frame" aria-pressed="'+(ui.rb==='frame')+'">Kategori frame</button>'+
+        '<button type="button" data-rb="hasil" aria-pressed="'+(ui.rb==='hasil')+'">Hasil lapangan (W)</button></div>'+
+      '<div class="seg" role="group" aria-label="Filter tim">'+
+        [{v:'ALL',t:'Semua'}].concat(STATE.kategori.map(function(k){return {v:k.kode,t:k.kode};})).map(function(o){
+          return '<button type="button" data-rf="'+esc(o.v)+'" aria-pressed="'+(ui.rf===o.v)+'">'+esc(o.t)+'</button>';}).join('')+'</div>'+
+      '<select id="rp" aria-label="Pilih petugas"><option value="">Semua petugas</option>'+
+        pOpts.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===ui.rp?' selected':'')+'>'+esc(p.nama)+'</option>';}).join('')+'</select></div>';
+    var groups = {};
+    P.forEach(function(p){
+      if(ui.rf!=='ALL' && p.kat!==ui.rf) return;
+      if(ui.rp && p.id!==ui.rp) return;
+      var d=dataOf(p); if(!d) return;
+      d.rows.forEach(function(r){
+        var v=r[2], key;
+        if(ui.rb==='frame') key = r[1] || '(kosong)';
+        else key = r[3] ? r[3] : (!v ? '(belum didata)' : (v==='1'||v==='2'||v==='3') ? '(W belum diisi)' : '(tidak eligible)');
+        (groups[key]=groups[key]||A()); addTo(groups[key],v);
+      });
+    });
+    var keys = Object.keys(groups).sort(function(a,b){var pa=a.charAt(0)==='(',pb=b.charAt(0)==='('; return pa!==pb?(pa?1:-1):a<b?-1:a>b?1:0;});
+    var sub=A();
+    h += '<div class="rows"><table class="rk"><thead><tr><th>Kategori</th>'+NUMH.replace('>Sampel<','>'+(ui.rb==='frame'?'Sampel':'Jumlah usaha')+'<')+'<th>Progres</th></tr></thead><tbody>';
+    if(!keys.length) h += '<tr><td colspan="9" class="dim">Belum ada data untuk pilihan ini.</td></tr>';
+    keys.forEach(function(k){var a=groups[k]; ['n','1','2','3','x','b'].forEach(function(f){sub[f]+=a[f];});
+      h += '<tr><td>'+(k.charAt(0)==='('?'<span class="dim">'+esc(k)+'</span>':'<b>'+esc(k)+'</b>')+'</td>'+numCells(a)+progCell(a)+'</tr>';});
+    if(keys.length) h += '<tr class="tot"><td>Jumlah</td>'+numCells(sub)+progCell(sub)+'</tr>';
+    h += '</tbody></table></div></section>';
+
+    /* 3. per petugas */
+    h += '<section class="rk-sec"><h2>Rekap per petugas</h2><div class="rows"><table class="rk"><thead><tr><th>No</th><th>Petugas</th><th>PML</th>'+NUMH+'<th>Progres</th><th>Data per</th></tr></thead><tbody>';
+    STATE.kategori.forEach(function(k){
+      var a=A();
+      P.forEach(function(p,i){
+        if(p.kat!==k.kode) return;
+        var d=dataOf(p), ap=aggPetugas(p); ['n','1','2','3','x','b'].forEach(function(f){a[f]+=ap[f];});
+        h += '<tr class="k-'+esc(p.kat)+'"><td class="dim">'+(i+1)+'</td><td><span class="chip">'+esc(p.kat)+'</span> '+esc(p.nama)+'</td><td class="dim">'+esc(pmlNama(p.pml)||'–')+'</td>'+
+             (d ? numCells(ap)+progCell(ap)+'<td class="dim">'+esc(tgl(d.tgl))+'</td>' : '<td colspan="8" class="dim">Belum masuk rekap</td><td></td>')+'</tr>';
+      });
+      h += '<tr class="tot"><td></td><td colspan="2">Subtotal '+esc(k.kode)+'</td>'+numCells(a)+progCell(a)+'<td></td></tr>';
+    });
+    h += '</tbody></table></div></section>';
+    return h;
+  }
+
+  function uploadHTML(){
+    var u=ui.up, h='<section class="up" aria-label="Perbarui data rekap"><h3>Perbarui data dari spreadsheet petugas</h3>'+
+      '<ol><li>Di Google Drive, klik kanan folder spreadsheet petugas lalu pilih <b>Download</b> (hasilnya file .zip). Bisa juga unduh satu per satu lewat <b>File → Download → Microsoft Excel (.xlsx)</b>.</li>'+
+      '<li>Pilih atau seret file .zip / .xlsx / .csv itu ke kotak di bawah. Beberapa file sekaligus boleh.</li>'+
+      '<li>Periksa pasangan file dan petugas, lalu tekan <b>Simpan rekap</b>. Data petugas yang tidak diunggah tetap memakai data sebelumnya.</li></ol>'+
+      '<div class="drop" id="drop"><span>Seret file ke sini, atau</span><input type="file" id="f-up" multiple accept=".zip,.xlsx,.xls,.csv" aria-label="Pilih file spreadsheet"></div>';
+    h += '<details><summary>Atau tempel isi sheet satu petugas</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">'+
+      '<p class="hint" style="margin:0;color:var(--muted);font-size:14px">Buka spreadsheet petugas, tekan Ctrl+A lalu Ctrl+C, kemudian tempel di sini. Baris judul kolom harus ikut tersalin.</p>'+
+      '<select id="paste-pid" aria-label="Petugas untuk data tempelan"><option value="">Pilih petugas…</option>'+
+        STATE.petugas.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===u.pastePid?' selected':'')+'>'+esc(p.nama)+' ('+esc(p.kat)+')</option>';}).join('')+'</select>'+
+      '<textarea id="paste-t" placeholder="Tempel isi sheet di sini">'+esc(u.paste)+'</textarea>'+
+      '<div class="bar"><button type="button" class="btn" id="b-paste">Baca tempelan</button></div></div></details>';
+    if(u.items.length){
+      var seen={};
+      h += '<div class="rows"><table><thead><tr><th>File</th><th>Petugas</th><th>Baris usaha</th><th>Status</th><th></th></tr></thead><tbody>';
+      u.items.forEach(function(it,i){
+        var dup = it.pid && seen[it.pid]; if(it.pid) seen[it.pid]=true;
+        var st = it.err ? '<span class="st-no">'+esc(it.err)+'</span>' : !it.pid ? '<span class="st-no">Pilih petugas</span>' : dup ? '<span class="st-no">Petugas dobel, yang terakhir dipakai</span>' : '<span class="st-ok">Siap</span>';
+        var a=A(); (it.rows||[]).forEach(function(r){addTo(a,r[2]);});
+        h += '<tr><td style="overflow-wrap:anywhere">'+esc(it.name)+(it.sheet?' <span class="dim" style="color:var(--muted)">· '+esc(it.sheet)+'</span>':'')+'</td>'+
+          '<td>'+(it.err?'':'<select data-upi="'+i+'" aria-label="Petugas untuk '+esc(it.name)+'"><option value="">–</option>'+
+            STATE.petugas.map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===it.pid?' selected':'')+'>'+esc(p.nama)+'</option>';}).join('')+'</select>')+'</td>'+
+          '<td>'+(it.rows?a.n+' ('+(a.n-a.b)+' didata)':'')+'</td><td>'+st+'</td>'+
+          '<td><button type="button" class="btn danger" data-updel="'+i+'">Hapus</button></td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    var ready = u.items.filter(function(x){return x.pid && x.rows;}).length;
+    h += '<div class="bar"><button type="button" class="btn primary" id="b-saverk"'+(ready&&!u.busy?'':' disabled')+'>Simpan rekap ('+ready+' petugas)</button>'+
+         '<span class="msg" role="status">'+esc(u.busy?'Membaca file…':u.msg)+'</span></div></section>';
+    return h;
+  }
+
+  /* ---------- pembacaan spreadsheet ---------- */
+  function norm(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
+  var NUMCELL=/^\(?-?\d{1,2}\)?$/;
+  function findCol(grid, from, upto, re){ for(var r=from;r<upto;r++){var row=grid[r]||[]; for(var c=0;c<row.length;c++){ if(re.test(norm(row[c]).toUpperCase())) return c;}} return -1;}
+  function letter(s){var t=norm(s).toUpperCase(), m=t.match(/^\[?([A-Z])\]?(?=$|[\s.\-:)])/); return m?m[1]:t.slice(0,14);}
+  function parseGrid(grid){
+    var h=-1;
+    for(var r=0;r<Math.min(20,grid.length);r++){ if((grid[r]||[]).some(function(c){return /IDENTIFIKASI\s+KEBERADAAN/i.test(norm(c));})){h=r;break;} }
+    if(h<0) return null;
+    var from=Math.max(0,h-2), lim=Math.min(grid.length,h+3);
+    var cV=findCol(grid,from,lim,/IDENTIFIKASI\s+KEBERADAAN/);
+    var cW=findCol(grid,from,lim,/KATEGORI\s+USAHA\s*\(?\s*HASIL/);
+    var cK=findCol(grid,from,lim,/^KATEGORI\s+USAHA$/);
+    var cK2=findCol(grid,from,lim,/^KATEGORI\s+(DI\s+LAPANGAN|HASIL\s+IDENTIFIKASI\s+AWAL)$/);
+    var cId=findCol(grid,from,lim,/IDSBR/);
+    var cNm=findCol(grid,from,lim,/NAMA\s+LENGKAP/);
+    if(cW<0) cW=cV+1;
+    var rows=[];
+    for(var r2=h+1;r2<grid.length;r2++){
+      var row=grid[r2]||[];
+      var id=cId>-1?norm(row[cId]):'', nm=cNm>-1?norm(row[cNm]):'';
+      if(!id && !nm) continue;
+      if((id && NUMCELL.test(id)) || (!id && NUMCELL.test(nm))) continue;
+      if(/IDSBR|NAMA\s+LENGKAP/i.test(id+' '+nm)) continue;
+      var vr=norm(row[cV]), m=vr.match(/^\(?\s*(\d+)/), v=m?String(parseInt(m[1],10)):(vr?vr.slice(0,10):'');
+      var kf=cK>-1?letter(row[cK]):''; if(!kf && cK2>-1) kf=letter(row[cK2]);
+      rows.push([id||nm.slice(0,40), kf, v, letter(row[cW])]);
+    }
+    return {rows:rows};
+  }
+  function parseDelim(text, d){
+    var out=[],row=[],cell='',q=false,ch;
+    for(var i=0;i<text.length;i++){ ch=text[i];
+      if(q){ if(ch==='"'){ if(text[i+1]==='"'){cell+='"';i++;} else q=false; } else cell+=ch; }
+      else if(ch==='"' && cell===''){ q=true; }
+      else if(ch===d){ row.push(cell); cell=''; }
+      else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n') i++; row.push(cell); out.push(row); row=[]; cell=''; }
+      else cell+=ch;
+    }
+    if(cell!==''||row.length){ row.push(cell); out.push(row); }
+    return out;
+  }
+  function key(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+  function matchPetugas(fname){
+    var f=key(String(fname).replace(/\.[^.]+$/,'')), best=null;
+    STATE.petugas.forEach(function(p){var k=key(p.nama); if(k.length>=3 && f.indexOf(k)>-1 && (!best||k.length>key(best.nama).length)) best=p;});
+    if(best) return best.id;
+    var c=STATE.petugas.filter(function(p){return String(p.nama).split(/[\s.]+/).some(function(t){t=key(t); return t.length>=4 && f.indexOf(t)>-1;});});
+    return c.length===1?c[0].id:'';
+  }
+  function mkItem(nm,res,sheet){
+    if(!res) return {name:nm, err:'Kolom IDENTIFIKASI KEBERADAAN tidak ditemukan'};
+    return {name:nm, pid:matchPetugas(nm), rows:res.rows, sheet:sheet||''};
+  }
+  function csvItem(nm,t){ var first=(t.split(/\r?\n/)[0]||''); var d=(first.split(';').length>first.split(',').length)?';':','; return mkItem(nm, parseGrid(parseDelim(t,d))); }
+  function xlsxItem(nm,buf){
+    try{ var wb=XLSX.read(buf,{type:'array'}), res=null, sh='';
+      for(var i=0;i<wb.SheetNames.length&&!res;i++){ var g=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:false,defval:'',blankrows:false}); res=parseGrid(g); sh=wb.SheetNames[i]; }
+      return mkItem(nm,res,sh);
+    }catch(e){ return {name:nm, err:'File tidak bisa dibaca'}; }
+  }
+  function loadScript(src,glob){return new Promise(function(res,rej){ if(window[glob]) return res(window[glob]); var s=document.createElement('script'); s.src=src; s.onload=function(){window[glob]?res(window[glob]):rej(new Error('pustaka gagal dimuat'));}; s.onerror=function(){rej(new Error('pustaka gagal dimuat, periksa koneksi'));}; document.head.appendChild(s);});}
+  function readOne(f){
+    if(/\.zip$/i.test(f.name)) return f.arrayBuffer().then(function(b){return JSZip.loadAsync(b);}).then(function(z){
+      var ents=[]; z.forEach(function(path,e){ if(!e.dir && /\.(xlsx|xls|csv)$/i.test(path) && !/(^|\/)(__MACOSX|\._)/.test(path)) ents.push(e); });
+      if(!ents.length) return [{name:f.name, err:'Tidak ada file .xlsx/.csv di dalam zip'}];
+      return Promise.all(ents.map(function(e){ var nm=e.name.split('/').pop();
+        return /\.csv$/i.test(nm) ? e.async('string').then(function(t){return csvItem(nm,t);}) : e.async('arraybuffer').then(function(b){return xlsxItem(nm,b);}); }));
+    });
+    if(/\.csv$/i.test(f.name)) return f.text().then(function(t){return [csvItem(f.name,t)];});
+    return f.arrayBuffer().then(function(b){return [xlsxItem(f.name,b)];});
+  }
+  function handleFiles(files){
+    var list=[].slice.call(files||[]); if(!list.length) return;
+    ui.up.busy=true; ui.up.msg=''; render();
+    var needX=list.some(function(f){return /\.(xlsx|xls|zip)$/i.test(f.name);}), needZ=list.some(function(f){return /\.zip$/i.test(f.name);});
+    Promise.all([needX?loadScript(XLSX_URL,'XLSX'):0, needZ?loadScript(JSZIP_URL,'JSZip'):0])
+      .then(function(){return Promise.all(list.map(readOne));})
+      .then(function(arrs){ arrs.forEach(function(a){ ui.up.items=ui.up.items.concat(a); }); ui.up.busy=false;
+        var n=ui.up.items.filter(function(x){return !x.pid&&!x.err;}).length; ui.up.msg=n?n+' file belum dipasangkan dengan petugas.':''; render(); })
+      .catch(function(e){ ui.up.busy=false; ui.up.msg='Gagal membaca file: '+((e&&e.message)||e); render(); });
+  }
+  function readPaste(){
+    var t=ui.up.paste||'', pid=ui.up.pastePid;
+    if(!pid){ ui.up.msg='Pilih petugas untuk data tempelan.'; render(); return; }
+    if(!t.trim()){ ui.up.msg='Tempel isi sheet terlebih dulu.'; render(); return; }
+    var res=parseGrid(parseDelim(t,'\t')), p=STATE.petugas.filter(function(x){return x.id===pid;})[0];
+    var it=mkItem('Tempelan: '+(p?p.nama:pid), res); if(!it.err) it.pid=pid;
+    ui.up.items.push(it); ui.up.paste=''; ui.up.msg=it.err?'':'Tempelan terbaca.'; render();
+  }
+
+  /* ---------- tarik data dari Google Drive (koneksi milik penonton) ---------- */
+  var DRIVE='Google Drive';
+  function fileIdOf(u){var m=String(u||'').match(/\/d\/([A-Za-z0-9_-]{20,})/); return m?m[1]:'';}
+  function b64text(b){ var bin=atob(String(b).replace(/\s+/g,'')), n=bin.length, u=new Uint8Array(n); for(var i=0;i<n;i++) u[i]=bin.charCodeAt(i);
+    try{ return new TextDecoder('utf-8').decode(u); }catch(e){ return bin; } }
+  function driveErr(e){
+    var c=e&&e.code;
+    if(c==='needs_reauth') return 'Koneksi Google Drive kedaluwarsa. Sambungkan ulang di claude.ai → Settings → Connectors.';
+    if(c==='server_not_connected'||c==='selection_required') return 'Google Drive belum tersambung di akun yang membuka dashboard ini. Tambahkan di claude.ai → Settings → Connectors.';
+    if(c==='not_in_manifest'||c==='approval_required'||c==='consent_required') return 'Izin Google Drive untuk dashboard ini belum diberikan. Tekan tombol lagi lalu pilih Izinkan.';
+    if(c==='not_granted'||c==='capability_disabled'||c==='capability_removed') return 'Penarikan data tidak tersedia di tampilan ini. Buka dashboard di claude.ai.';
+    if(c==='blocked_by_policy') return 'Akses Google Drive diblokir oleh kebijakan organisasi.';
+    if(c==='server_unavailable'||c==='rate_limited') return 'Google Drive sedang tidak merespons. Coba lagi sebentar lagi.';
+    if(c==='tool_error') return 'Google Drive menolak: '+((e&&e.message)||'file tidak bisa dibaca');
+    return 'Gagal ('+(c||'galat')+'): '+((e&&e.message)||'');
+  }
+  var FATAL={needs_reauth:1,server_not_connected:1,selection_required:1,not_in_manifest:1,approval_required:1,consent_required:1,not_granted:1,capability_disabled:1,capability_removed:1,blocked_by_policy:1};
+  function syncDrive(){
+    if(!ui.mcp || ui.sync.busy) return;
+    var list=STATE.petugas.filter(function(p){return fileIdOf(p.url);});
+    ui.sync={busy:true, done:0, total:list.length, ok:{}, fail:[], msg:''}; render();
+    var i=0;
+    function next(){
+      if(i>=list.length) return finish();
+      var p=list[i++];
+      ui.mcp.callTool(DRIVE,'download_file_content',{fileId:fileIdOf(p.url), exportMimeType:'text/csv'},{cache:false})
+      .then(function(res){
+        var pl=res&&res.payload, b=pl&&(pl.content||pl.data);
+        if(!b) throw {code:'tool_error', message:'isi file kosong'};
+        var g=parseGrid(parseDelim(b64text(b),','));
+        if(!g) ui.sync.fail.push(p.nama+': kolom IDENTIFIKASI KEBERADAAN tidak ditemukan');
+        else ui.sync.ok[p.id]=g.rows;
+      })
+      .catch(function(e){
+        if(e && FATAL[e.code]){ ui.sync.fatal=driveErr(e); i=list.length; return; }
+        ui.sync.fail.push(p.nama+': '+driveErr(e));
+      })
+      .then(function(){ ui.sync.done++; render(); next(); });
+    }
+    function finish(){
+      var ids=Object.keys(ui.sync.ok);
+      if(ui.sync.fatal || !ids.length){ ui.sync.busy=false; ui.sync.msg=ui.sync.fatal||('Tidak ada data yang terbaca. '+ui.sync.fail.join('; ')); render(); return; }
+      var st=clone(STATE), t=today(); st.rekap=st.rekap||{};
+      ids.forEach(function(id){ st.rekap[id]={tgl:t, src:'Google Drive', rows:ui.sync.ok[id]}; });
+      st.diperbarui=t;
+      var note=ids.length+' spreadsheet terbaca'+(ui.sync.fail.length?'; gagal: '+ui.sync.fail.join('; '):'')+'. ';
+      publish(st, function(m){ ui.sync.msg=note+m; ui.sync.busy=false; }, 'b-sync');
+    }
+    next();
+  }
+  function syncBar(){
+    if(!ui.canEdit || !ui.mcp) return '';
+    var s=ui.sync;
+    return '<div class="bar"><button type="button" class="btn primary" id="b-sync"'+(s.busy?' disabled':'')+'>'+(s.busy?'Menarik data… ('+s.done+'/'+s.total+')':'Tarik data dari Google Drive')+'</button>'+
+      '<span class="msg" role="status">'+esc(s.msg||'Membaca kolom V dan W semua spreadsheet petugas, lalu menyimpan rekap.')+'</span></div>';
+  }
+
+  /* ---------- simpan ---------- */
+  function clone(o){return JSON.parse(JSON.stringify(o));}
+  function nextId(list){var m=0;list.forEach(function(p){var n=parseInt(String(p.id).replace(/\D/g,''),10);if(n>m)m=n;});return 'p'+pad(m+1);}
+
+  function buildDoc(state){
+    var json = JSON.stringify(state).replace(/</g,'\\u003c');
+    var reset = ':root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}';
+    return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+reset+'</style></head><body>'+
+      '<title>Monitoring Petugas GB SET 2027</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n'+
+      '<link rel="preconnect" href="https://fonts.googleapis.com">\n'+
+      '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">\n'+
+      '<style id="gb-style">'+STYLE+'</style>\n<div id="gb-root"></div>\n'+
+      '<script type="application/json" id="gb-state">'+json+'<\/script>\n'+
+      '<script id="gb-app">'+APP+'<\/script></body></html>';
+  }
+  function publish(state, setMsg, btnId){
+    setMsg('Menyimpan…'); render();
+    var b=document.getElementById(btnId); if(b) b.disabled=true;
+    return ui.artifact.publish(buildDoc(state)).then(function(){ setMsg('Tersimpan. Memuat versi terbaru…'); render(); })
+    .catch(function(e){
+      var c = e && e.code;
+      if(c==='conflict') setMsg('Ada versi yang lebih baru. Halaman dimuat ulang ke versi itu; ulangi perubahan bila perlu.');
+      else if(c==='not_writer'||c==='not_granted'||c==='capability_disabled'||c==='not_declared'){ setMsg(''); ui.canEdit=false; ui.editing=false; ui.upOpen=false; }
+      else if(c==='rate_limited') setMsg('Terlalu sering menyimpan. Tunggu sebentar lalu tekan Simpan lagi.');
+      else setMsg('Belum tersimpan karena gangguan layanan. Coba tekan Simpan lagi.');
+      render();
+    });
+  }
+
+  function save(){
+    var d = ui.draft;
+    d.pml = (d.pml||[]).filter(function(m){return m.nama.trim();}).map(function(m){return {id:m.id,nama:m.nama.trim(),kat:m.kat};});
+    d.petugas = d.petugas.filter(function(p){return p.nama.trim();}).map(function(p){
+      var m = d.pml.filter(function(x){return x.id===p.pml && x.kat===p.kat;})[0];
+      var o={id:p.id,nama:p.nama.trim(),kat:p.kat,pml:m?m.id:'',url:p.url.trim()}, tg=parseInt(p.target,10); if(tg>0) o.target=tg; return o;});
+    var tc={}; Object.keys(d.target||{}).forEach(function(tim){ tc[tim]={}; Object.keys(d.target[tim]).forEach(function(k){ var n=parseInt(d.target[tim][k],10); if(n>0) tc[tim][k]=n; }); }); d.target=tc;
+    var bad = d.petugas.filter(function(p){return p.url && !okUrl(p.url);});
+    if(d.folderUrl && !okUrl(d.folderUrl)) {ui.msg='Tautan folder harus diawali https://'; render(); return;}
+    if(bad.length){ui.msg='Tautan untuk '+bad.map(function(p){return p.nama;}).join(', ')+' harus diawali https://'; render(); return;}
+    var keep={}; d.petugas.forEach(function(p){ if(STATE.rekap[p.id]) keep[p.id]=STATE.rekap[p.id]; }); d.rekap=keep;
+    d.diperbarui = today();
+    publish(d, function(m){ui.msg=m;}, 'b-save');
+  }
+  function saveRekap(){
+    var ok=ui.up.items.filter(function(x){return x.pid && x.rows;}); if(!ok.length) return;
+    var st=clone(STATE), t=today(); st.rekap=st.rekap||{};
+    ok.forEach(function(x){ st.rekap[x.pid]={tgl:t, src:x.name, rows:x.rows}; });
+    st.diperbarui=t;
+    publish(st, function(m){ui.up.msg=m;}, 'b-saverk');
+  }
+
+  function bulk(){
+    var t = (document.getElementById('e-bulk')||{}).value||'', hit=0, miss=[];
+    t.split(/\r?\n/).forEach(function(line){
+      var m = line.match(/https:\/\/\S+/i); if(!m) return;
+      var name = line.slice(0,m.index).split(/\t|\s{2,}|\s\|\s|;/)[0].replace(/^\s*\d+[.)]?\s*/,'').trim().toLowerCase();
+      if(!name) return;
+      var p = ui.draft.petugas.filter(function(x){return x.nama.trim().toLowerCase()===name;})[0];
+      if(p){p.url=m[0];hit++;} else miss.push(name);
+    });
+    ui.msg = hit+' tautan dicocokkan'+(miss.length?'; tidak ditemukan: '+miss.join(', '):'')+'. Tekan Simpan perubahan untuk menyimpan.';
+    render();
+  }
+
+  function manageHTML(){
+    var d = ui.draft;
+    var h = '<section class="manage" aria-label="Kelola dashboard"><h2>Kelola dashboard</h2>'+
+      '<p>Ubah data di bawah lalu tekan <b>Simpan perubahan</b>. Perubahan tersimpan sebagai versi baru dan langsung terlihat oleh semua yang membuka dashboard.</p>';
+    h += '<div class="fgrid"><label for="e-kegiatan">Nama kegiatan<input id="e-kegiatan" data-k="kegiatan" value="'+esc(d.kegiatan)+'"></label>'+
+         '<label for="e-satker">Satuan kerja<input id="e-satker" data-k="satker" value="'+esc(d.satker)+'"></label>'+
+         '<label for="e-folder">Tautan folder Google Drive<input id="e-folder" data-k="folderUrl" placeholder="https://drive.google.com/drive/folders/…" value="'+esc(d.folderUrl)+'"></label></div>';
+    h += '<label for="e-catatan">Pengumuman untuk petugas (opsional)<textarea id="e-catatan" data-k="catatan" placeholder="Misalnya: batas pengisian monitoring harian pukul 21.00 WITA">'+esc(d.catatan)+'</textarea></label>';
+    d.pml = d.pml || [];
+    h += '<h3 class="sub-h">PML (Pengawas Lapangan)</h3><div class="rows"><table class="pml-t"><thead><tr><th>No</th><th>Nama PML</th><th>Kategori</th><th></th></tr></thead><tbody>';
+    d.pml.forEach(function(m,i){
+      h += '<tr><td class="n">'+(i+1)+'</td>'+
+        '<td><input id="e-mnama-'+esc(m.id)+'" data-mi="'+i+'" data-f="nama" value="'+esc(m.nama)+'" aria-label="Nama PML '+(i+1)+'"></td>'+
+        '<td class="kat"><select id="e-mkat-'+esc(m.id)+'" data-mi="'+i+'" data-f="kat" aria-label="Kategori PML '+(i+1)+'">'+
+          d.kategori.map(function(k){return '<option value="'+esc(k.kode)+'"'+(k.kode===m.kat?' selected':'')+'>'+esc(k.kode)+'</option>';}).join('')+'</select></td>'+
+        '<td class="act"><button type="button" class="btn danger" data-delpml="'+i+'" aria-label="Hapus PML '+esc(m.nama)+'">Hapus</button></td></tr>';
+    });
+    h += '</tbody></table></div><div class="bar"><button type="button" class="btn" id="b-add-pml">+ Tambah PML</button></div>';
+    d.target = d.target || {};
+    h += '<h3 class="sub-h">Target sampel eligible per kategori usaha</h3><p>Isi jumlah target tiap kategori untuk masing-masing tim. Kosongkan bila tidak ada target.</p><div class="rows"><table class="tg-t"><thead><tr><th>Kategori</th>'+
+      d.kategori.map(function(k){return '<th class="r">'+esc(k.kode)+'</th>';}).join('')+'</tr></thead><tbody>';
+    LETTERS.forEach(function(L){
+      h += '<tr><td class="n"><b>'+L+'</b></td>'+d.kategori.map(function(k){ var v=(d.target[k.kode]||{})[L];
+        return '<td><input id="e-t-'+esc(k.kode)+'-'+L+'" type="number" min="0" inputmode="numeric" data-tk="'+esc(k.kode)+'|'+L+'" value="'+(v||'')+'" aria-label="Target '+esc(k.kode)+' kategori '+L+'"></td>'; }).join('')+'</tr>';
+    });
+    h += '<tr><td class="n">Jumlah</td>'+d.kategori.map(function(k){ var t=0; LETTERS.forEach(function(L){t+=parseInt((d.target[k.kode]||{})[L],10)||0;}); return '<td class="r"><b>'+t+'</b></td>'; }).join('')+'</tr></tbody></table></div>';
+    h += '<h3 class="sub-h">Petugas (PPL)</h3><p>Urutan di tabel ini menjadi nomor urut di dashboard.</p><div class="rows"><table><thead><tr><th>No</th><th>Nama petugas</th><th>Kategori</th><th>PML</th><th>Target</th><th>Tautan spreadsheet</th><th></th></tr></thead><tbody>';
+    d.petugas.forEach(function(p,i){
+      var bad = p.url && !okUrl(p.url);
+      var opts = d.pml.filter(function(m){return m.kat===p.kat;});
+      h += '<tr><td class="n">'+(i+1)+'</td>'+
+        '<td><input id="e-nama-'+esc(p.id)+'" data-i="'+i+'" data-f="nama" value="'+esc(p.nama)+'" aria-label="Nama petugas '+(i+1)+'"></td>'+
+        '<td class="kat"><select id="e-kat-'+esc(p.id)+'" data-i="'+i+'" data-f="kat" aria-label="Kategori petugas '+(i+1)+'">'+
+          d.kategori.map(function(k){return '<option value="'+esc(k.kode)+'"'+(k.kode===p.kat?' selected':'')+'>'+esc(k.kode)+'</option>';}).join('')+'</select></td>'+
+        '<td class="pml"><select id="e-pml-'+esc(p.id)+'" data-i="'+i+'" data-f="pml" aria-label="PML petugas '+(i+1)+'"><option value="">Belum ada PML</option>'+
+          opts.map(function(m){return '<option value="'+esc(m.id)+'"'+(m.id===p.pml?' selected':'')+'>'+esc(m.nama||'(tanpa nama)')+'</option>';}).join('')+'</select></td>'+
+        '<td style="width:90px"><input id="e-tg-'+esc(p.id)+'" type="number" min="0" inputmode="numeric" data-i="'+i+'" data-f="target" value="'+esc(p.target||'')+'" aria-label="Target petugas '+(i+1)+'"></td>'+
+        '<td><input id="e-url-'+esc(p.id)+'" class="'+(bad?'bad':'')+'" data-i="'+i+'" data-f="url" placeholder="https://docs.google.com/spreadsheets/d/…" value="'+esc(p.url)+'" aria-label="Tautan spreadsheet petugas '+(i+1)+'"></td>'+
+        '<td class="act"><button type="button" class="btn danger" data-del="'+i+'" aria-label="Hapus '+esc(p.nama)+'">Hapus</button></td></tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '<div class="bar"><button type="button" class="btn" id="b-add">+ Tambah petugas</button></div>';
+    h += '<details><summary>Tempel banyak tautan sekaligus</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">'+
+      '<p>Tempel baris berisi nama petugas dan tautan spreadsheet, misalnya hasil salinan dari sheet "00 Daftar Tautan Petugas". Nama dicocokkan dengan daftar di atas.</p>'+
+      '<textarea id="e-bulk" placeholder="Akbar Ati	UMB	https://docs.google.com/spreadsheets/d/…"></textarea>'+
+      '<div class="bar"><button type="button" class="btn" id="b-bulk">Cocokkan tautan</button></div></div></details>';
+    h += '<div class="bar"><button type="button" class="btn primary" id="b-save">Simpan perubahan</button><button type="button" class="btn" id="b-cancel">Batal</button><span class="msg" role="status">'+esc(ui.msg)+'</span></div></section>';
+    return h;
+  }
+
+  function render(){
+    var focusId = document.activeElement && document.activeElement.id, pos = null;
+    try{ if(focusId && document.activeElement.selectionStart!=null) pos=document.activeElement.selectionStart; }catch(e){}
+    root.innerHTML = viewHTML();
+    if(focusId){var el=document.getElementById(focusId); if(el){el.focus(); try{ if(pos!=null) el.setSelectionRange(pos,pos);}catch(e){}}}
+  }
+
+  /* ---------- event ---------- */
+  window.addEventListener('hashchange',function(){ ui.tab=tabFromHash(); render(); });
+  root.addEventListener('click',function(e){
+    var t = e.target.closest('button'); if(!t) return;
+    if(t.dataset.tab){ ui.tab=t.dataset.tab; try{ history.replaceState(null,'','#'+ui.tab); }catch(err){} render(); try{ window.scrollTo(0,0); }catch(err){} return; }
+    if(t.id==='b-edit'){ ui.editing=!ui.editing; ui.draft=ui.editing?clone(STATE):null; if(ui.draft) ui.draft.pml=ui.draft.pml||[]; ui.msg=''; render(); return; }
+    if(t.dataset.rb){ ui.rb=t.dataset.rb; render(); return; }
+    if(t.dataset.rf){ ui.rf=t.dataset.rf; render(); return; }
+    if(t.dataset.sf){ ui.sf=t.dataset.sf; render(); return; }
+    if(t.closest('.seg') && t.dataset.f){ ui.filter=t.dataset.f; render(); return; }
+    if(t.id==='b-up'){ ui.upOpen=!ui.upOpen; render(); return; }
+    if(t.id==='b-paste'){ readPaste(); return; }
+    if(t.dataset.updel!=null){ ui.up.items.splice(+t.dataset.updel,1); render(); return; }
+    if(t.id==='b-saverk'){ saveRekap(); return; }
+    if(t.id==='b-sync'){ syncDrive(); return; }
+    if(t.id==='b-add'){ ui.draft.petugas.push({id:nextId(ui.draft.petugas),nama:'',kat:ui.draft.kategori[0].kode,pml:'',target:'',url:''}); render(); return; }
+    if(t.dataset.del!=null){ ui.draft.petugas.splice(+t.dataset.del,1); render(); return; }
+    if(t.id==='b-add-pml'){ var mx=0; ui.draft.pml.forEach(function(x){var n=parseInt(String(x.id).replace(/\D/g,''),10); if(n>mx)mx=n;}); ui.draft.pml.push({id:'m'+pad(mx+1),nama:'',kat:ui.draft.kategori[0].kode}); render(); return; }
+    if(t.dataset.delpml!=null){ var gone=ui.draft.pml.splice(+t.dataset.delpml,1)[0]; ui.draft.petugas.forEach(function(p){ if(p.pml===gone.id) p.pml=''; }); render(); return; }
+    if(t.id==='b-bulk'){ bulk(); return; }
+    if(t.id==='b-cancel'){ ui.editing=false; ui.draft=null; ui.msg=''; render(); return; }
+    if(t.id==='b-save'){ save(); }
+  });
+  root.addEventListener('input',function(e){
+    var t=e.target;
+    if(t.id==='q'){ ui.q=t.value; render(); return; }
+    if(t.id==='paste-t'){ ui.up.paste=t.value; return; }
+    if(!ui.draft) return;
+    if(t.dataset.k){ ui.draft[t.dataset.k]=t.value; return; }
+    if(t.dataset.tk){ var pr=t.dataset.tk.split('|'); ui.draft.target=ui.draft.target||{}; (ui.draft.target[pr[0]]=ui.draft.target[pr[0]]||{})[pr[1]]=t.value; return; }
+    if(t.tagName==='SELECT') return;
+    if(t.dataset.mi!=null){ ui.draft.pml[+t.dataset.mi][t.dataset.f]=t.value; return; }
+    if(t.dataset.i!=null && t.dataset.f){ ui.draft.petugas[+t.dataset.i][t.dataset.f]=t.value; if(t.dataset.f==='url') t.classList.toggle('bad', !!t.value && !okUrl(t.value)); }
+  });
+  root.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.id==='f-up'){ handleFiles(t.files); return; }
+    if(t.id==='rp'){ ui.rp=t.value; render(); return; }
+    if(t.id==='sp'){ ui.sp=t.value; render(); return; }
+    if(t.id==='paste-pid'){ ui.up.pastePid=t.value; return; }
+    if(t.dataset.upi!=null){ ui.up.items[+t.dataset.upi].pid=t.value; render(); return; }
+    if(!ui.draft || t.tagName!=='SELECT') return;
+    if(t.dataset.mi!=null){ var m=ui.draft.pml[+t.dataset.mi]; m.kat=t.value; ui.draft.petugas.forEach(function(p){ if(p.pml===m.id && p.kat!==m.kat) p.pml=''; }); render(); return; }
+    if(t.dataset.i!=null){ var p=ui.draft.petugas[+t.dataset.i]; p[t.dataset.f]=t.value; if(t.dataset.f==='kat') p.pml=''; render(); }
+  });
+  root.addEventListener('dragover',function(e){ var d=e.target.closest&&e.target.closest('#drop'); if(!d) return; e.preventDefault(); d.classList.add('over'); });
+  root.addEventListener('dragleave',function(e){ var d=e.target.closest&&e.target.closest('#drop'); if(d) d.classList.remove('over'); });
+  root.addEventListener('drop',function(e){ var d=e.target.closest&&e.target.closest('#drop'); if(!d) return; e.preventDefault(); handleFiles(e.dataTransfer&&e.dataTransfer.files); });
+
+  window.__gbTest = {parseGrid:parseGrid, parseDelim:parseDelim, matchPetugas:matchPetugas, b64text:b64text, fileIdOf:fileIdOf};
+  render();
+
+  try{
+    if(window.claude && typeof window.claude.use==='function'){
+      window.claude.use('artifact').then(function(a){
+        if(!a) return;
+        ui.artifact = a; ui.canEdit = true; render();
+        window.claude.use('mcp').then(function(m){ if(m){ ui.mcp=m; render(); } }).catch(function(){});
+      }).catch(function(){});
+    }
+  }catch(e){}
+
+})();
+</script></body></html>
